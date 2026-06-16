@@ -1,3 +1,4 @@
+import time
 import os
 import random
 import sys
@@ -26,6 +27,32 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
+def gameover(screen: pg.Surface) -> None:
+    black_img = pg.Surface((WIDTH, HEIGHT)) #演習1-1
+    black_img.fill((0, 0, 0))
+    black_img.set_alpha(200)#演習1-2透明度
+    #演習1-3　白文字GameOver
+    fonto = pg.font.Font(None, 80)
+    txt = fonto.render("Game Over", True, (255, 255, 255))
+    txt_rct = txt.get_rect()
+    txt_rct.center = WIDTH//2, HEIGHT//2
+    black_img.blit(txt, txt_rct)
+    #演習1-4　こうかとん画像
+    kk1_img = pg.image.load("fig/4.png") 
+    # 左側のこうかとん（文字の中心から左に200ピクセル、縦は中央）
+    kk_left_rct = kk1_img.get_rect()
+    kk_left_rct.center = (WIDTH // 2 - 200, HEIGHT // 2)
+    black_img.blit(kk1_img, kk_left_rct)
+    
+    # 右側のこうかとん（文字の中心から右に200ピクセル、縦は中央）
+    kk_right_rct = kk1_img.get_rect()
+    kk_right_rct.center = (WIDTH // 2 + 200, HEIGHT // 2)
+    black_img.blit(kk1_img, kk_right_rct)
+    
+    screen.blit(black_img, (0,0)) #演習1-5画面表示
+    #演習1-6
+    pg.display.update()
+    time.sleep(5)
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -51,6 +78,7 @@ def main():
                 return
         if kk_rct.colliderect(bb_rct): #こうかとんRectと爆弾Rectが重なったら 
             print("ゲームオーバー")
+            gameover(screen)
             return
         screen.blit(bg_img, [0, 0]) 
 
