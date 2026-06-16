@@ -27,6 +27,7 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
+#演習１
 def gameover(screen: pg.Surface) -> None:
     black_img = pg.Surface((WIDTH, HEIGHT)) #演習1-1
     black_img.fill((0, 0, 0))
@@ -48,11 +49,22 @@ def gameover(screen: pg.Surface) -> None:
     kk_right_rct = kk1_img.get_rect()
     kk_right_rct.center = (WIDTH // 2 + 200, HEIGHT // 2)
     black_img.blit(kk1_img, kk_right_rct)
-    
+
     screen.blit(black_img, (0,0)) #演習1-5画面表示
     #演習1-6
     pg.display.update()
     time.sleep(5)
+
+#演習2
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    bb_imgs = []
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_img.set_colorkey((0, 0, 0)) #黒を透明化
+        bb_imgs.append(bb_img)
+    bb_accs = [a for a in range(1,11)] #加速度のリスト
+    return bb_imgs, bb_accs
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -62,6 +74,10 @@ def main():
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
+
+    #演習２　リストを取得
+    bb_imgs, bb_accs = init_bb_imgs()
+
     #爆弾の初期化
     bb_img = pg.Surface((20,20))
     pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10) #半径10の赤い円の描画
@@ -103,7 +119,16 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) #動きをなかったことにする
         screen.blit(kk_img, kk_rct)
 
-        bb_rct.move_ip(vx, vy)
+        #演習2の後半
+        idx = min(tmr // 500, 9)#時間に応じて爆弾の大きさと速度（加速度）を切り替える
+        bb_img = bb_imgs[idx] #現在の段階の爆弾画像を取得
+        bb_rct.width = bb_img.get_rect().width #幅更新
+        bb_rct.height = bb_img.get_rect().height #高さ更新
+        #元の速度に加速度を掛け算して現在の速度（avx, avy）を計算
+        avx = vx * bb_accs[idx]
+        avy = vy * bb_accs[idx]
+
+        bb_rct.move_ip(avx, avy)
         yoko, tate = check_bound(bb_rct)
         if not yoko:
             vx *= -1
