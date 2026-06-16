@@ -66,12 +66,33 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     bb_accs = [a for a in range(1,11)] #加速度のリスト
     return bb_imgs, bb_accs
 
+#演習3
+def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
+    kk_img = pg.image.load("fig/3.png")
+    
+    # 左右反転させた右向きの画像（右側の方向で使い回すと綺麗になります）
+    kk1_img = pg.transform.flip(kk_img, True, False)
+    
+    kk_dict = {
+        (0, 0): pg.transform.rotozoom(kk_img, 0, 0.9),       # 静止（左向き）
+        (-5, 0): pg.transform.rotozoom(kk_img, 0, 0.9),      # 左
+        (-5, -5): pg.transform.rotozoom(kk_img, -45, 0.9),   # 左上
+        (0, -5): pg.transform.rotozoom(kk_img, -90, 0.9),    # 上 (左から90度時計回り=-90)
+        (+5, -5): pg.transform.rotozoom(kk1_img, 45, 0.9), # 右上
+        (+5, 0): pg.transform.rotozoom(kk1_img, 0, 0.9),    # 右
+        (+5, +5): pg.transform.rotozoom(kk1_img, -45, 0.9), # 右下
+        (0, +5): pg.transform.rotozoom(kk1_img, -90, 0.9),  # 下
+        (-5, +5): pg.transform.rotozoom(kk_img, 45, 0.9),    # 左下
+    }
+    return kk_dict
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")  
     #こうかとん初期化 
-    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    kk_imgs = get_kk_imgs()#演習3にて追加
+    kk_img = kk_imgs[(0, 0)]#演習3にて変更
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
 
@@ -117,6 +138,8 @@ def main():
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) #動きをなかったことにする
+        #演習３　合計移動量に従ってこうかとんの画像を切り替える
+        kk_img = kk_imgs[tuple(sum_mv)]
         screen.blit(kk_img, kk_rct)
 
         #演習2の後半
